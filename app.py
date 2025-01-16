@@ -105,7 +105,7 @@ def home():
 # Run the app
 if __name__ == "__main__":
     try:
-        port = int(os.environ.get("PORT", 5000))  # Use PORT environment variable or default to 5000
+        port = int(os.environ.get("PORT"))  # Use PORT environment variable or default to 5000
         app.run(host="0.0.0.0", port=port)
     except OSError as e:
         print(f"Port {port} is already in use. Trying a different port...")

@@ -3,42 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Dashboard</title>
+    <title>Sales Dashboard</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
 </head>
 <body>
-    <h1 style="text-align: center;">Flask Dashboard</h1>
-    <form method="POST" style="text-align: center;">
-        <label for="location">Select Location(s):</label><br>
-        <select name="location" multiple>
-            {% for location in locations %}
-                <option value="{{ location }}" {% if location in selected_location %}selected{% endif %}>{{ location }}</option>
-            {% endfor %}
-        </select><br><br>
+    <div class="container mt-5">
+        <h1 class="text-center">Sales Dashboard</h1>
 
-        <label for="event">Select Event Type(s):</label><br>
-        <select name="event" multiple>
-            {% for event in events %}
-                <option value="{{ event }}" {% if event in selected_event %}selected{% endif %}>{{ event }}</option>
-            {% endfor %}
-        </select><br><br>
+        <!-- Filters Section -->
+        <form method="POST" class="my-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="location" class="form-label">Select Location:</label>
+                    <select name="location" id="location" class="form-select" multiple>
+                        {% for loc in locations %}
+                        <option value="{{ loc }}" {% if loc in selected_location %}selected{% endif %}>
+                            {{ loc }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="event" class="form-label">Select Event Type:</label>
+                    <select name="event" id="event" class="form-select" multiple>
+                        {% for evt in events %}
+                        <option value="{{ evt }}" {% if evt in selected_event %}selected{% endif %}>
+                            {{ evt }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </form>
 
-        <button type="submit">Apply Filters</button>
-    </form>
+        <!-- Message Section -->
+        {% if message %}
+        <div class="alert alert-warning text-center" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
 
-    <div>
-        <h2>Revenue Trend</h2>
-        {{ revenue_graph | safe }}
-    </div>
-
-    <div>
-        <h2>Event Impact</h2>
-        {{ event_graph | safe }}
-    </div>
-
-    <div>
-        <h2>Location Performance</h2>
-        {{ location_graph | safe }}
+        <!-- Graphs Section -->
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <h4>Revenue Over Time</h4>
+                <div>{{ revenue_graph|safe }}</div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h4>Revenue by Event Type</h4>
+                <div>{{ event_graph|safe }}</div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h4>Revenue by Location</h4>
+                <div>{{ location_graph|safe }}</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

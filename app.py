@@ -1,121 +1,77 @@
-import os
 import pandas as pd
-from flask import Flask, render_template, request
+import streamlit as st
 import plotly.express as px
-import socket
 
-# Function to load data
+# Load data
 def load_data():
-    excel_file_path = "Insight_Trek_Dataset_Round3.xlsx"  # Path to your Excel file
+    return pd.read_excel("Insight_Trek_Dataset_Round3.xlsx", sheet_name="Sales Data", engine="openpyxl")
 
-    if not os.path.exists(excel_file_path):
-        raise FileNotFoundError(f"Excel file not found: {excel_file_path}")
-
-    try:
-        data = pd.read_excel(excel_file_path, sheet_name="Sales Data", engine="openpyxl")
-        return data
-    except Exception as e:
-        raise ValueError(f"Failed to load Excel file: {e}")
-
-# Load dataset
 data = load_data()
 
-# Initialize Flask app
-app = Flask(__name__)
+# App Title
+st.title("Comprehensive Sales Dashboard")
 
-# Utility functions
-def generate_revenue_graph(filtered_data):
-    revenue_trend = filtered_data.groupby("Date")[["Revenue", "UnitsSold"]].sum().reset_index()
-    fig_revenue = px.line(
-        revenue_trend,
-        x="Date",
-        y="Revenue",
-        title="Revenue Over Time",
-        labels={"Date": "Date", "Revenue": "Revenue"},
-    )
-    return fig_revenue.to_html(full_html=False)
+# Sidebar Filters
+st.sidebar.header("Filter Options")
+locations = st.sidebar.multiselect(
+    "Select Locations:", options=data["Location"].unique(), default=data["Location"].unique()
+)
+events = st.sidebar.multiselect(
+    "Select Event Types:", options=data["Event Type"].dropna().unique(), default=data["Event Type"].dropna().unique()
+)
 
-def generate_event_graph(filtered_data):
-    event_impact = filtered_data.groupby("Event Type")["Revenue"].sum().reset_index()
-    fig_event = px.bar(
-        event_impact,
-        x="Event Type",
-        y="Revenue",
-        title="Revenue by Event Type",
-        text="Revenue",
-        labels={"Event Type": "Event Type", "Revenue": "Revenue"},
-    )
-    return fig_event.to_html(full_html=False)
+# Filter data
+filtered_data = data.copy()
+if locations:
+    filtered_data = filtered_data[filtered_data["Location"].isin(locations)]
+if events:
+    filtered_data = filtered_data[filtered_data["Event Type"].isin(events)]
 
-def generate_location_graph(filtered_data):
-    location_performance = filtered_data.groupby("Location")["Revenue"].sum().reset_index()
-    fig_location = px.bar(
-        location_performance,
-        x="Location",
-        y="Revenue",
-        title="Revenue by Location",
-        text="Revenue",
-        labels={"Location": "Location", "Revenue": "Revenue"},
-    )
-    return fig_location.to_html(full_html=False)
+# Metrics Section
+st.header("Key Metrics")
+total_revenue = filtered_data["Revenue"].sum()
+total_units_sold = filtered_data["UnitsSold"].sum()
+num_transactions = len(filtered_data)
 
-# Home route
-@app.route("/", methods=["GET", "POST"])
-def home():
-    # Filters
-    selected_location = request.form.getlist("location")
-    selected_event = request.form.getlist("event")
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Revenue", f"${total_revenue:,.2f}")
+col2.metric("Units Sold", f"{total_units_sold:,}")
+col3.metric("Transactions", f"{num_transactions:,}")
 
-    # Apply filters to the data
-    filtered_data = data.copy()
-    if selected_location:
-        filtered_data = filtered_data[filtered_data["Location"].isin(selected_location)]
-    if selected_event:
-        filtered_data = filtered_data[filtered_data["Event Type"].isin(selected_event)]
+# Revenue Trend Graph
+st.subheader("Revenue Over Time")
+revenue_trend = filtered_data.groupby("Date")["Revenue"].sum().reset_index()
+fig_revenue = px.line(revenue_trend, x="Date", y="Revenue", title="Revenue Over Time", labels={"Date": "Date", "Revenue": "Revenue ($)"})
+st.plotly_chart(fig_revenue, use_container_width=True)
 
-    if filtered_data.empty:
-        return render_template(
-            "index.html",
-            locations=data["Location"].unique(),
-            events=data["Event Type"].dropna().unique(),
-            selected_location=selected_location,
-            selected_event=selected_event,
-            message="No data available for the selected filters.",
-            revenue_graph="",
-            event_graph="",
-            location_graph="",
-        )
+# Event Impact Graph
+st.subheader("Revenue by Event Type")
+event_impact = filtered_data.groupby("Event Type")["Revenue"].sum().reset_index()
+fig_event = px.bar(event_impact, x="Event Type", y="Revenue", title="Revenue by Event Type", text="Revenue", labels={"Event Type": "Event Type", "Revenue": "Revenue ($)"})
+fig_event.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+st.plotly_chart(fig_event, use_container_width=True)
 
-    # Generate graphs
-    revenue_graph = generate_revenue_graph(filtered_data)
-    event_graph = generate_event_graph(filtered_data)
-    location_graph = generate_location_graph(filtered_data)
+# Location Performance Graph
+st.subheader("Revenue by Location")
+location_performance = filtered_data.groupby("Location")["Revenue"].sum().reset_index()
+fig_location = px.bar(location_performance, x="Location", y="Revenue", title="Revenue by Location", text="Revenue", labels={"Location": "Location", "Revenue": "Revenue ($)"})
+fig_location.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+st.plotly_chart(fig_location, use_container_width=True)
 
-    return render_template(
-        "index.html",
-        locations=data["Location"].unique(),
-        events=data["Event Type"].dropna().unique(),
-        selected_location=selected_location,
-        selected_event=selected_event,
-        message="",
-        revenue_graph=revenue_graph,
-        event_graph=event_graph,
-        location_graph=location_graph,
-    )
+# Detailed Table View
+st.subheader("Detailed Data View")
+st.dataframe(filtered_data)
 
+# Download Option
+st.sidebar.header("Download Filtered Data")
+def convert_df_to_csv(df):
+    return df.to_csv(index=False).encode('utf-8')
 
+csv = convert_df_to_csv(filtered_data)
+st.sidebar.download_button(
+    label="Download CSV",
+    data=csv,
+    file_name="filtered_sales_data.csv",
+    mime="text/csv",
+)
 
-def find_free_port():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('', 0))
-        return s.getsockname()[1]
-
-if __name__ == "__main__":
-    try:
-        port = int(os.environ.get("PORT", 5000))  # Default port
-        app.run(host="0.0.0.0", port=port)
-    except OSError as e:
-        print(f"Port {port} is already in use. Finding an available port...")
-        free_port = find_free_port()
-        print(f"Running on available port {free_port}")
-        app.run(host="0.0.0.0", port=free_port)

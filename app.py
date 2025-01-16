@@ -8,7 +8,7 @@ import os
 # Function to load data from a compressed .zip file
 def load_data():
     # Path to the zip file
-    zip_file_path = "Insight_Trek_Dataset_Round3.zip"
+    zip_file_path = "Insight_Trek_Dataset_Round3_compressed.zip"
     extracted_file_path = "Insight_Trek_Dataset_Round3.xlsx"
 
     # Extract the zip file

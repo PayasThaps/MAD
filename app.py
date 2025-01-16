@@ -2,13 +2,22 @@ import dash
 from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
+import requests
 
-# Load the dataset
+# URL to your dataset in cloud storage (e.g., Google Drive, Dropbox, or similar)
+FILE_URL = "https://docs.google.com/spreadsheets/d/1DUG-5vztpVRJNrHcF4Q8PnjyyZ0qAsBj/edit?usp=drive_link&ouid=104226120210276234509&rtpof=true&sd=true"
+
+# Function to load data dynamically from the cloud
 def load_data():
-    file_path = "Insight_Trek_Dataset_Round3.xlsx"  # Update with your file location
-    data = pd.read_excel(file_path, sheet_name="Sales Data")
+    # Download the file from the cloud
+    response = requests.get(FILE_URL)
+    with open("dataset.xlsx", "wb") as file:
+        file.write(response.content)
+    # Load the Excel file into a pandas DataFrame
+    data = pd.read_excel("dataset.xlsx", sheet_name="Sales Data")
     return data
 
+# Load the dataset
 data = load_data()
 
 # Initialize Dash app

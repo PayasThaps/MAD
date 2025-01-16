@@ -4,3 +4,4 @@ plotly
 flask
 gunicorn
 socket
+streamlit

@@ -105,5 +105,5 @@ def update_dashboard(selected_location, selected_event):
 # Main entry point
 if __name__ == "__main__":
     # Bind the app to the PORT environment variable, or use a default port (e.g., 4000)
-    port = int(os.environ.get("PORT", 4000))
+    port = 10000
     app.run_server(host="0.0.0.0", port=port)

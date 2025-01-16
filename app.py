@@ -5,7 +5,7 @@ import plotly.express as px
 import requests
 
 # URL to your dataset in cloud storage (e.g., Google Drive or Dropbox)
-FILE_URL = "https://docs.google.com/spreadsheets/d/1DUG-5vztpVRJNrHcF4Q8PnjyyZ0qAsBj/edit?usp=drive_link&ouid=104226120210276234509&rtpof=true&sd=true"
+FILE_URL = "https://1drv.ms/x/c/ac09c56cc6f9c995/EUA4fmDRHgJLgQvt4KvDdaABeaUkbaX-uhmV69vdGzu_3A?e=55ywH4"
 
 # Function to load data dynamically from the cloud
 def load_data():

@@ -3,3 +3,4 @@ openpyxl
 plotly
 flask
 gunicorn
+socket

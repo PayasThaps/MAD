@@ -2,19 +2,29 @@ import dash
 from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
-import requests
+import zipfile
+import os
 
-# URL to your dataset in cloud storage (e.g., Google Drive or Dropbox)
-FILE_URL = "https://1drv.ms/x/c/ac09c56cc6f9c995/EUA4fmDRHgJLgQvt4KvDdaABeaUkbaX-uhmV69vdGzu_3A?e=55ywH4"
-
-# Function to load data dynamically from the cloud
+# Function to load data from a compressed .zip file
 def load_data():
-    # Download the file from the cloud
-    response = requests.get(FILE_URL)
-    with open("dataset.xlsx", "wb") as file:
-        file.write(response.content)
-    # Load the Excel file into a pandas DataFrame using the 'openpyxl' engine
-    data = pd.read_excel("dataset.xlsx", sheet_name="Sales Data", engine="openpyxl")
+    # Path to the zip file
+    zip_file_path = "Insight_Trek_Dataset_Round3.zip"
+    extracted_file_path = "Insight_Trek_Dataset_Round3.xlsx"
+
+    # Extract the zip file
+    with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
+        zip_ref.extractall()  # Extracts the contents of the zip file
+
+    # Check if the extracted file exists
+    if not os.path.exists(extracted_file_path):
+        raise FileNotFoundError(f"Expected file {extracted_file_path} not found after extraction.")
+
+    # Load the Excel file
+    try:
+        data = pd.read_excel(extracted_file_path, sheet_name="Sales Data", engine="openpyxl")
+    except Exception as e:
+        raise ValueError(f"Failed to load Excel file: {e}")
+
     return data
 
 # Load the dataset

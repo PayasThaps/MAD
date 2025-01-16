@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1 style="text-align: center;">Flask Dashboard</h1>
+    <form method="POST" style="text-align: center;">
+        <label for="location">Select Location(s):</label><br>
+        <select name="location" multiple>
+            {% for location in locations %}
+                <option value="{{ location }}" {% if location in selected_location %}selected{% endif %}>{{ location }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="event">Select Event Type(s):</label><br>
+        <select name="event" multiple>
+            {% for event in events %}
+                <option value="{{ event }}" {% if event in selected_event %}selected{% endif %}>{{ event }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <button type="submit">Apply Filters</button>
+    </form>
+
+    <div>
+        <h2>Revenue Trend</h2>
+        {{ revenue_graph | safe }}
+    </div>
+
+    <div>
+        <h2>Event Impact</h2>
+        {{ event_graph | safe }}
+    </div>
+
+    <div>
+        <h2>Location Performance</h2>
+        {{ location_graph | safe }}
+    </div>
+</body>
+</html>

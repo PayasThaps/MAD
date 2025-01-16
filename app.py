@@ -1,6 +1,7 @@
 import pandas as pd
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 import os
 
 def load_data():
@@ -11,29 +12,26 @@ def load_data():
     """
     excel_file_path = "Insight_Trek_Dataset_Round3.xlsx"  # Path to your .xlsx file
 
-    # Check if the file exists
     if not os.path.exists(excel_file_path):
         raise FileNotFoundError(f"Excel file not found: {excel_file_path}")
 
-    # Attempt to load the Excel file
     try:
         data = pd.read_excel(excel_file_path, sheet_name="Sales Data", engine="openpyxl")
+        print("Excel data loaded successfully.")
+        return data
     except Exception as e:
         raise ValueError(f"Failed to load Excel file: {e}")
 
-    print("Excel data loaded successfully.")
-    return data
-
-# Load the dataset
+# Load dataset
 data = load_data()
 
 # Initialize Dash app
 app = Dash(__name__)
-app.title = "Advanced Data Analysis Dashboard"
+app.title = "Comprehensive Data Dashboard"
 
-# App layout
+# Layout
 app.layout = html.Div([
-    html.H1("Advanced Data Analysis Dashboard", style={"textAlign": "center"}),
+    html.H1("Comprehensive Data Dashboard", style={"textAlign": "center"}),
 
     # Filters Section
     html.Div([
@@ -74,11 +72,18 @@ app.layout = html.Div([
         dcc.Graph(id="summary-table")
     ], style={"marginBottom": "30px"}),
 
-    # Graphs Section
+    # Visualization Section
     html.Div([
+        html.H4("Revenue Analysis"),
         dcc.Graph(id="revenue-trend"),
+
+        html.H4("Event Impact"),
         dcc.Graph(id="event-impact"),
+
+        html.H4("Sentiment Analysis"),
         dcc.Graph(id="sentiment-impact"),
+
+        html.H4("Category Performance"),
         dcc.Graph(id="category-performance"),
     ])
 ])
@@ -163,4 +168,5 @@ def update_dashboard(selected_location, selected_event, selected_sentiment):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    port = int(os.environ.get("PORT", 8050))
+    app.run_server(host="0.0.0.0", port=port)

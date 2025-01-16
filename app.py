@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from flask import Flask, render_template, request
 import plotly.express as px
+import socket
 
 # Function to load data
 def load_data():
@@ -102,11 +103,19 @@ def home():
         location_graph=location_graph,
     )
 
-# Run the app
+
+
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
+
 if __name__ == "__main__":
     try:
-        port = int(os.environ.get("PORT"))  # Use PORT environment variable or default to 5000
+        port = int(os.environ.get("PORT", 5000))  # Default port
         app.run(host="0.0.0.0", port=port)
     except OSError as e:
-        print(f"Port {port} is already in use. Trying a different port...")
-        app.run(host="0.0.0.0", port=port + 1)
+        print(f"Port {port} is already in use. Finding an available port...")
+        free_port = find_free_port()
+        print(f"Running on available port {free_port}")
+        app.run(host="0.0.0.0", port=free_port)

@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import requests
 
-# URL to your dataset in cloud storage (e.g., Google Drive, Dropbox, or similar)
+# URL to your dataset in cloud storage (e.g., Google Drive or Dropbox)
 FILE_URL = "https://docs.google.com/spreadsheets/d/1DUG-5vztpVRJNrHcF4Q8PnjyyZ0qAsBj/edit?usp=drive_link&ouid=104226120210276234509&rtpof=true&sd=true"
 
 # Function to load data dynamically from the cloud
@@ -13,8 +13,8 @@ def load_data():
     response = requests.get(FILE_URL)
     with open("dataset.xlsx", "wb") as file:
         file.write(response.content)
-    # Load the Excel file into a pandas DataFrame
-    data = pd.read_excel("dataset.xlsx", sheet_name="Sales Data")
+    # Load the Excel file into a pandas DataFrame using the 'openpyxl' engine
+    data = pd.read_excel("dataset.xlsx", sheet_name="Sales Data", engine="openpyxl")
     return data
 
 # Load the dataset
